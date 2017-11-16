@@ -22,7 +22,7 @@
         "yiisoft/yii2": "*"
     },
     "autoload": {
-        "psr-4": {"evgeniydev\\formcreator\\": ""}
+        "psr-4": {"evgeniydev\\yii2\\behaviors\\": ""}
     },
     "extra": {
         "asset-installer-paths": {

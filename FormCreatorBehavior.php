@@ -1,6 +1,6 @@
 <?php
 
-namespace evgeniydev\formcreator;
+namespace evgeniydev\yii2\behaviors;
 
 use yii\helpers\Html;
 use yii\base\Behavior;
