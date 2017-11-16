@@ -1,0 +1,33 @@
+{
+    "name": "evgeniydev/yii2-form-creator",
+    "description": "Yii2 behavior to create view form",
+    "keywords": [
+        "yii2",
+        "behavior"
+    ],
+    "homepage": "https://github.com/jeka-deadline/yii2-FormCreatorBehavior",
+    "type": "yii2-extension",
+    "license": "BSD-3-Clause",
+    "version": "1.0",
+    "minimum-stability":"stable",
+    "authors": [
+        {
+            "name": "Evgeniy Bublik",
+            "email": "evgeniy.bublik1992@gmail.com",
+            "homepage": "https://github.com/jeka-deadline",
+            "role": "Developer"
+        },
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": {"evgeniydev\\formcreator\\": ""}
+    },
+    "extra": {
+        "asset-installer-paths": {
+            "npm-asset-library": "vendor/npm",
+            "bower-asset-library": "vendor/bower"
+        }
+    }
+}
