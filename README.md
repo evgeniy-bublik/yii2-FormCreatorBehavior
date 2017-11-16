@@ -58,7 +58,7 @@ public function behaviors()
 }
 ```
 **Controller file (app/controllers/SomeController.php)**
-```
+```php
 use app\models\SomeModel.php
 ...
 public function actionCreate()
