@@ -229,7 +229,7 @@ class FormCreatorBehavior extends Behavior
 
             $field = $form->field($model, $attributeName, $attributeOptions);
 
-            if ($label !== false && !is_null($label)) {
+            if (!is_null($label)) {
                 $field->label($label);
             }
 
