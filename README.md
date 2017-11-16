@@ -1,8 +1,6 @@
 ## Yii2 form create behavior
----
 This is behavior which generate view form for methods CREATE and UPDATE.
 ## Installation
----
 The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
 
 Either run
@@ -19,7 +17,6 @@ or add
 
 to the require section of your `composer.json` file.
 ## Basic usage
----
 **Model file (app/models/SomeModel.php)**
 ```php
 ...
@@ -98,7 +95,6 @@ public function actionUpdate($id)
 <?= $model->form; ?>
 ```
 ## Other field types
----
 **Checkbox**
 ```php
 'field1' => [
@@ -151,7 +147,6 @@ public function actionUpdate($id)
 ],
 ```
 ## Full list constants types
----
 * *__TEXT_INPUT_TYPE__* - text input
 * *__TEXTAREA_TYPE__* - textarea
 * *__CHECKBOX_TYPE__* - checkbox
@@ -166,7 +161,6 @@ public function actionUpdate($id)
 * *__CHECKBOXLIST_TYPE__* - checkboxe list
 * *__LISTBOX_TYPE__* - list box
 ## Other configuration
----
 **Label**
 ```php
 'field1' => [
@@ -212,7 +206,7 @@ or full form
 'attributes' => [...], // array attributes
 'template' => '{items}{beginBlockButtons}{submitButton}{cancelButton}{endBlockButtons}', // template view
 ```
-```php
+```
 {items} - elements of form
 {beginBlockButtons} - open tag for block with form buttons
 {submitButton} - submit form button
