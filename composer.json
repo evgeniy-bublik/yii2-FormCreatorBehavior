@@ -16,7 +16,7 @@
             "email": "evgeniy.bublik1992@gmail.com",
             "homepage": "https://github.com/jeka-deadline",
             "role": "Developer"
-        },
+        }
     ],
     "require": {
         "yiisoft/yii2": "*"
