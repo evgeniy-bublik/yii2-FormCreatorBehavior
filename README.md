@@ -250,3 +250,27 @@ or full form
     'htmlOptions' => [...], // cancel button html options
 ],
 ```
+**Tabs
+```php
+'class' => FormCreatorBehavior::className(),
+'tabOptions' => [ // tab options
+    'widgetName' => '...', // tab widget name, default is \yii\bootstrap\Tabs
+    'widgetOptions' => [
+        'keyNameContentField' => '...', // key name tab content field, default 'content'
+        // ... other some widget options
+    ],
+    'tabs' => [
+        [ // tab 1
+            'tabAttributes' => ['someField1', 'someField2', ...], // list attributes on this tab,
+            'content' => '{items}', // template of content tab, {items} to be replaced by fields attribues on this tab, 'content' if
+                       // keyNameContentField = 'content', if keyNameContentField not equal 'content', then key 'content' key must be other
+            // .. other tab options for this widget tab, example \yii\bootstrap\Tabs: 'title' => 'Some title',
+        ],
+        [ // tab 2
+            'tabAttributes' => ['someField3', 'someField4', ...], // list attributes on this tab,
+            // .. other tab options for this widget tab, example \yii\bootstrap\Tabs: 'title' => 'Some title',
+        ],
+        // ... other tabs
+    ],
+],
+```

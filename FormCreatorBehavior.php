@@ -83,6 +83,33 @@ class FormCreatorBehavior extends Behavior
         ],
     ];
     /**
+     * @var mixed[] $tabOptions Array options for tabs
+     *
+     * ...
+     * 'tabOptions' => [
+     *      'widgetName' => '...', //Widget name witch generate tabs, default it is \yii\bootstrap\Tabs
+     *      'widgetOptions' => [ // widgetOptions
+     *          'keyNameContentField' => '...', // key name tab content field, default 'content'
+     *          ... // other soem widget options
+     *      ],
+     *      'tabs' => [ // mixed array tabs
+     *          [ // tab 1
+     *              'tabAttributes' => [...], // array attributes which show on this tab
+     *              'content' => '{items}', // template of content tab, {items} to be replaced by fields attribues on this tab, 'content' if
+     *                  // keyNameContentField = 'content', if keyNameContentField not equal 'content', then key 'content' key must be other
+     *              ...
+     *              //other configuration for some widget tab configurations. Example: 'title' => 'Some title',
+     *          ],
+     *          [ // tab 2
+     *              'tabAttributes' => [...], // array attributes which show on this tab
+     *              ...
+     *              //other configuration for some widget tab configurations. Example: 'title' => 'Some title',
+     *          ],
+     *      ],
+     * ],
+     */
+    public $tabOptions;
+    /**
      * @var mixed[] $submitButtonOptions Array options for submit buttons (update|create).
      *
      * ...
@@ -186,7 +213,7 @@ class FormCreatorBehavior extends Behavior
             case static::SIMPLE_FORM:
                 return $this->getSimpleForm();
             case static::TAB_FORM:
-                throw MethodNotAllowedHttpException('This method not allowed');
+                return $this->getTabsForm();
             default:
                 return $this->getSimpleForm();
         }
@@ -218,58 +245,7 @@ class FormCreatorBehavior extends Behavior
                 $options        = [];
             }
 
-            $attributeOptions = ArrayHelper::getValue($options, 'attributeOptions', []);
-            $type             = ArrayHelper::getValue($options, 'type', static::TEXT_INPUT_TYPE);
-            $label            = ArrayHelper::getValue($options, 'label', null);
-            $hint             = ArrayHelper::getValue($options, 'hint', null);
-
-            if (!ArrayHelper::keyExists($type, $this->allowedFormInputTypes)) {
-                $type = static::TEXT_INPUT_TYPE;
-            }
-
-            $field = $form->field($model, $attributeName, $attributeOptions);
-
-            if (!is_null($label)) {
-                $field->label($label);
-            }
-
-            if (!is_null($hint)) {
-
-                if (is_array($hint)) {
-                    $content = ArrayHelper::getValue($hint, 'content', null);
-                    $options = ArrayHelper::getValue($hint, 'options', []);
-                } else {
-                    $content = $hint;
-                    $options = [];
-
-                }
-
-                $field->hint($content, $options);
-            }
-
-            switch ($type) {
-                case static::WIDGET_TYPE:
-                    $items .= $this->generateWidgetField($field, $options);
-                    break;
-                case static::DROPDOWNLIST_TYPE:
-                case static::RADIOLIST_TYPE:
-                case static::CHECKBOXLIST_TYPE:
-                case static::LISTBOX_TYPE:
-                    $items .= $this->generateInputWithItems($field, $type, $options);
-                    break;
-                case static::RADIO_TYPE:
-                    $items .= $this->generateRadionInput($field, $options);
-                    break;
-                case static::INPUT_TYPE:
-                    $items .= $this->generateInput($field, $options);
-                    break;
-                default:
-                    $inputOptions = ArrayHelper::getValue($options, 'inputOptions', []);
-
-                    call_user_func_array([$field, $type], [$inputOptions]);
-
-                    $items .= $field;
-            }
+            $items .= $this->generateFormField($form, $model, $attributeName, $options);
         }
 
         echo strtr($this->template, [
@@ -287,6 +263,147 @@ class FormCreatorBehavior extends Behavior
         ob_get_clean();
 
         return $this->form = $result;
+    }
+
+    /**
+     * Generate form fields divide on tabs
+     *
+     * @return string Return html form for attributes model with tab widget
+     */
+    public function getTabsForm()
+    {
+        if (!empty($this->form)) {
+            return $this->form;
+        }
+
+        $model                      = $this->owner;
+        $formElements               = [];
+        $tabOptions                 = $this->tabOptions;
+        $widgetName                 = ArrayHelper::getValue($tabOptions, 'widgetName', '\yii\bootstrap\Tabs');
+        $widgetOptions              = ArrayHelper::getValue($tabOptions, 'widgetOptions', []);
+        $tabs                       = ArrayHelper::getValue($tabOptions, 'tabs', []);
+        $widgetKeyNameContentField  = ArrayHelper::remove($widgetOptions, 'keyNameContentField', 'content');
+
+        ob_start();
+
+        $form = ActiveForm::begin($this->formOptions);
+
+        foreach ($this->attributes as $attributeName => $options) {
+            $field = null;
+
+            if (!is_array($options)) {
+                $attributeName  = $options;
+                $options        = [];
+            }
+
+            $formElements[ $attributeName ] =  $this->generateFormField($form, $model, $attributeName, $options);
+        }
+
+        $tabItems = [];
+
+        foreach ($tabs as $tab) {
+            $tabContentTemplate = ArrayHelper::remove($tab, $widgetKeyNameContentField, '{items}');
+            $tabAttributes      = ArrayHelper::remove($tab, 'tabAttributes', []);
+
+            if (!is_array($tabAttributes)) {
+                $tabAttributes = [];
+            }
+
+            $attributesOnTab = '';
+
+            foreach ($tabAttributes as $attributeName) {
+                $attributesOnTab .= (isset($formElements[ $attributeName ])) ? $formElements[ $attributeName ] : '';
+            }
+
+            $tabContentTemplate = strtr($tabContentTemplate, [
+                '{items}' => $attributesOnTab
+            ]);
+
+            $tab[ $widgetKeyNameContentField ] = $tabContentTemplate;
+
+            $tabItems[] = $tab;
+        }
+
+        $widgetOptions = ArrayHelper::merge($widgetOptions, ['items' => $tabItems]);
+
+        echo strtr($this->template, [
+            '{items}'             => call_user_func_array([$widgetName, 'widget'], [$widgetOptions]),
+            '{beginBlockButtons}' => $this->getBeginBlockButtons(),
+            '{endBlockButtons}'   => $this->getEndBlockButtons(),
+            '{submitButton}'      => $this->getSubmitButton(),
+            '{cancelButton}'      => $this->getCancelButton(),
+        ]);
+
+        ActiveForm::end();
+
+        $result = ob_get_contents();
+
+        ob_get_clean();
+
+        return $this->form = $result;
+    }
+
+    /**
+     * Generate form field
+     *
+     * @param \yii\widgets\ActiveForm $form Object ActiveForm widget
+     * @param \yii\base\Model|\yii\db\ActiveRecord $model Object yii model
+     * @param string $attributeName Attribute name for model
+     * @param mixed[] $options Array options for attribute and field for attribute
+     * @return string Return html form element for attribute
+     */
+    private function generateFormField($form, $model, $attributeName, $options)
+    {
+        $field = null;
+
+        $attributeOptions = ArrayHelper::getValue($options, 'attributeOptions', []);
+        $type             = ArrayHelper::getValue($options, 'type', static::TEXT_INPUT_TYPE);
+        $label            = ArrayHelper::getValue($options, 'label', null);
+        $hint             = ArrayHelper::getValue($options, 'hint', null);
+
+        if (!ArrayHelper::keyExists($type, $this->allowedFormInputTypes)) {
+            $type = static::TEXT_INPUT_TYPE;
+        }
+
+        $field = $form->field($model, $attributeName, $attributeOptions);
+
+        if (!is_null($label)) {
+            $field->label($label);
+        }
+
+        if (!is_null($hint)) {
+
+            if (is_array($hint)) {
+                $content = ArrayHelper::getValue($hint, 'content', null);
+                $options = ArrayHelper::getValue($hint, 'options', []);
+            } else {
+                $content = $hint;
+                $options = [];
+
+            }
+
+            $field->hint($content, $options);
+        }
+
+        switch ($type) {
+            case static::WIDGET_TYPE:
+                return $this->generateWidgetField($field, $options);
+            case static::DROPDOWNLIST_TYPE:
+            case static::RADIOLIST_TYPE:
+            case static::CHECKBOXLIST_TYPE:
+            case static::LISTBOX_TYPE:
+                return $this->generateInputWithItems($field, $type, $options);
+            case static::RADIO_TYPE:
+                return $this->generateRadionInput($field, $options);
+            case static::INPUT_TYPE:
+                return $this->generateInput($field, $options);
+            default:
+                $inputOptions = ArrayHelper::getValue($options, 'inputOptions', []);
+
+                call_user_func_array([$field, $type], [$inputOptions]);
+
+                return $field;
+        }
     }
 
     /**
