@@ -169,8 +169,7 @@ public function actionUpdate($id)
 ```php
 'field1' => function($form, $model) { // callable function
     return $form->field($model, 'field1');
-}
-],
+},
 ```
 **Label**
 ```php
