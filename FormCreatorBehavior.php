@@ -173,7 +173,10 @@ class FormCreatorBehavior extends Behavior
      *              'prompt' => 'Choose option',
      *          ],
      *          'hint' => '...', // hint for this attribute
-     *      ]
+     *      ],
+     *      'someAttribute4' => function($form, $model) { // callable function which return form field for this attribute
+     *          return $form->field($model, 'someAttribute4');
+     *      }
      * ],
      *
      */
@@ -240,7 +243,7 @@ class FormCreatorBehavior extends Behavior
         foreach ($this->attributes as $attributeName => $options) {
             $field = null;
 
-            if (!is_array($options)) {
+            if (!is_array($options) && !is_callable($options)) {
                 $attributeName  = $options;
                 $options        = [];
             }
@@ -291,7 +294,7 @@ class FormCreatorBehavior extends Behavior
         foreach ($this->attributes as $attributeName => $options) {
             $field = null;
 
-            if (!is_array($options)) {
+            if (!is_array($options) && !is_callable($options)) {
                 $attributeName  = $options;
                 $options        = [];
             }
@@ -355,6 +358,10 @@ class FormCreatorBehavior extends Behavior
     private function generateFormField($form, $model, $attributeName, $options)
     {
         $field = null;
+
+        if (is_callable($options)) {
+            return call_user_func_array($options, [$form, $model]);
+        }
 
         $attributeOptions = ArrayHelper::getValue($options, 'attributeOptions', []);
         $type             = ArrayHelper::getValue($options, 'type', static::TEXT_INPUT_TYPE);

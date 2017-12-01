@@ -50,6 +50,9 @@ public function behaviors()
                         'prompt' => 'Choose option',
                     ],
                 ],
+                'field4' => function($form, $model) { // callable function to return view field for this form
+                    return $form->field($model)
+                }
                 // other fields
             ],
         ]
@@ -161,6 +164,14 @@ public function actionUpdate($id)
 * *__CHECKBOXLIST_TYPE__* - checkboxe list
 * *__LISTBOX_TYPE__* - list box
 ## Other configuration
+**Input with callable function**
+***function template: function($form, $model){ return ...; }***
+```php
+'field1' => function($form, $model) { // callable function
+    return $form->field($model, 'field1');
+}
+],
+```
 **Label**
 ```php
 'field1' => [
@@ -250,7 +261,7 @@ or full form
     'htmlOptions' => [...], // cancel button html options
 ],
 ```
-**Tabs
+**Tabs**
 ```php
 'class' => FormCreatorBehavior::className(),
 'tabOptions' => [ // tab options
